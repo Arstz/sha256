@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 #include <random>
+#include <fstream>
+#include <vector>
 
 constexpr std::array<uint32_t, 64> SHA256::K;
 
@@ -150,51 +152,72 @@ bool starts_with_32_zero_bits(const std::array<uint8_t, 32>& hash) {
 	return hash[0] == 0 && hash[1] == 0 && hash[2] == 0 && hash[3] == 0;
 }
 
+// int main() {
+// 	SHA256 sha256;
+//
+// 	const std::string original_message = "give my friend 2 bitcoins for a pizza";
+// 	std::random_device rd;
+// 	std::mt19937 rng(rd());
+// 	std::uniform_int_distribution<unsigned int> dist(0, 255);
+//
+// 	std::array<uint8_t, 20> prefix{};
+// 	std::string full_message;
+// 	uint64_t attempts = 0;
+//
+// 	while (true) {
+// 		// Generate random 20-byte prefix
+// 		for (auto& byte : prefix) {
+// 			byte = static_cast<uint8_t>(dist(rng));
+// 		}
+//
+// 		// Create full message as std::string
+// 		full_message.clear();
+// 		full_message.reserve(20 + original_message.size());
+//
+// 		for (auto byte : prefix) {
+// 			full_message += static_cast<char>(byte);
+// 		}
+// 		full_message += original_message;
+//
+// 		// Hash the message
+// 		sha256.update(full_message);
+// 		std::array<uint8_t, 32> hash = sha256.digest();
+//
+// 		if (starts_with_32_zero_bits(hash)) {
+// 			std::cout << "Found matching prefix after " << attempts << " attempts:\n";
+// 			for (auto byte : prefix) {
+// 				std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+// 			}
+// 			std::cout << std::dec << "\n";
+// 			break;
+// 		}
+//
+// 		++attempts;
+// 		if (attempts % 1000000 == 0) {
+// 			std::cout << "Attempts: " << attempts << "\n";
+// 		}
+// 	}
+//
+// 	return 0;
+// }
 int main() {
-	SHA256 sha256;
-
-	const std::string original_message = "give my friend 2 bitcoins for a pizza";
-	std::random_device rd;
-	std::mt19937 rng(rd());
-	std::uniform_int_distribution<unsigned int> dist(0, 255);
-
-	std::array<uint8_t, 20> prefix{};
-	std::string full_message;
-	uint64_t attempts = 0;
-
-	while (true) {
-		// Generate random 20-byte prefix
-		for (auto& byte : prefix) {
-			byte = static_cast<uint8_t>(dist(rng));
-		}
-
-		// Create full message as std::string
-		full_message.clear();
-		full_message.reserve(20 + original_message.size());
-
-		for (auto byte : prefix) {
-			full_message += static_cast<char>(byte);
-		}
-		full_message += original_message;
-
-		// Hash the message
-		sha256.update(full_message);
-		std::array<uint8_t, 32> hash = sha256.digest();
-
-		if (starts_with_32_zero_bits(hash)) {
-			std::cout << "Found matching prefix after " << attempts << " attempts:\n";
-			for (auto byte : prefix) {
-				std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
-			}
-			std::cout << std::dec << "\n";
-			break;
-		}
-
-		++attempts;
-		if (attempts % 1000000 == 0) {
-			std::cout << "Attempts: " << attempts << "\n";
-		}
+	std::ifstream file("kse.der", std::ios::binary);
+	if (!file) {
+		std::cerr << "Error while opening the file" << std::endl;
+		return 1;
 	}
-
+	std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(file)),
+								std::istreambuf_iterator<char>());
+	SHA256 sha256;
+	sha256.update(buffer.data(), buffer.size());
+	std::array<uint8_t, 32> digest = sha256.digest();
+	std::ostringstream oss;
+	for (size_t i = 0; i < digest.size(); i++) {
+		if (i > 0)
+			oss << ":";
+		oss << std::uppercase << std::hex << std::setw(2) << std::setfill('0')
+			<< static_cast<int>(digest[i]);
+	}
+	std::cout << oss.str() << std::endl;
 	return 0;
 }
