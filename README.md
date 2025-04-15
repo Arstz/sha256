@@ -43,6 +43,21 @@ openssl x509 -req -sha256 -days 365 -in server_m.csr -CA server.crt -CAkey serve
 ## RSA-шифрування повідомлення 
 ```openssl pkeyutl -encrypt -pubin -inkey key.pub -in text.txt -out message.enc```
 
+## Перший сертифікат 
+
+![image](https://github.com/user-attachments/assets/b4ff066a-5c41-4bfa-9d44-bc85903c256f)
+Найперший сертифікат саме для common name kse.ua (згідно з даними crt.sh) був чинний з 19 червня 2021 року до 17 вересня 2021 року.
+
+## 
+
+![image](https://github.com/user-attachments/assets/dcebbadf-27e0-4c97-81d8-c3ef175458f3)
+
+Хеш співпадає з чинний сертифікатом kse.ua, але не співпадає з ТЗ, бо новий сертифікат був виданий 13 числа, пізніше, ніж зроблене ТЗ для завдання.
+
+![image](https://github.com/user-attachments/assets/a5305f7b-a339-46c2-9617-d4732fe4efb9)
+
+
+
 
 
 
